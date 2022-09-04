@@ -10,7 +10,7 @@ type testUser struct {
 }
 
 const (
-	testEventName = "test.event.type"
+	testHookName  = "test.event.type"
 	listenerCount = 3
 )
 
@@ -21,7 +21,7 @@ func TestNewEvent(t *testing.T) {
 		id:   123,
 	}
 
-	testEventType := NewEventType[testUser](testEventName)
+	testHook := NewHook[testUser](testHookName)
 
 	listener := func(event Event[testUser]) {
 		counter++
@@ -30,28 +30,38 @@ func TestNewEvent(t *testing.T) {
 			t.Fail()
 		}
 
-		if testEventType != event.Type {
+		if testHook != event.Hook {
 			t.Fail()
 		}
 
-		if testEventName != event.Type.GetName() {
+		if testHookName != event.Hook.GetName() {
 			t.Fail()
 		}
 	}
 
 	for i := 0; i < listenerCount; i++ {
-		testEventType.Listen(listener)
+		testHook.Listen(listener)
 	}
 
-	if listenerCount != testEventType.GetListenerCount() {
+	if listenerCount != testHook.GetListenerCount() {
 		t.Fail()
 	}
 
-	testEventType.
-		NewEvent(user).
-		Dispatch()
+	testHook.Dispatch(user)
 
 	if listenerCount != counter {
 		t.Fail()
 	}
 }
+
+//func thing() {
+//	userPreUpdate := NewHook[testUser]("user.preupdate")
+//	userUpdate := NewHook[testUser]("user.update")
+//	userUpdate.Listen(func(event Event[testUser]) {
+//
+//	})
+//
+//	userPreUpdate.NewEvent(&testUser{}).Dispatch()
+//	user.Save()
+//	userUpdate.NewEvent(&testUser{}).Dispatch()
+//}
