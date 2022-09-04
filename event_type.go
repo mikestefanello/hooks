@@ -30,6 +30,13 @@ func (e *EventType[T]) Listen(callback func(event Event[T])) {
 	e.listeners = append(e.listeners, callback)
 }
 
+func (e *EventType[T]) GetListenerCount() int {
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+
+	return len(e.listeners)
+}
+
 func (e *EventType[T]) NewEvent(message *T) *Event[T] {
 	return NewEvent[T](e, message)
 }

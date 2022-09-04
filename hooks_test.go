@@ -26,31 +26,32 @@ func TestNewEvent(t *testing.T) {
 	listener := func(event Event[testUser]) {
 		counter++
 
-		assertEqual(t, user, event.Msg, "user not equal to event message")
-		assertEqual(t, testEventType, event.Type, "event type incorrect")
-		assertEqual(t, testEventName, event.Type.GetName(), "event type name incorrect")
+		if user != event.Msg {
+			t.Fail()
+		}
+
+		if testEventType != event.Type {
+			t.Fail()
+		}
+
+		if testEventName != event.Type.GetName() {
+			t.Fail()
+		}
 	}
 
 	for i := 0; i < listenerCount; i++ {
 		testEventType.Listen(listener)
 	}
 
+	if listenerCount != testEventType.GetListenerCount() {
+		t.Fail()
+	}
+
 	testEventType.
 		NewEvent(user).
 		Dispatch()
 
-	assertEqual(
-		t,
-		listenerCount,
-		counter,
-		"expected %d invocations of the listener - got %d",
-		listenerCount,
-		counter,
-	)
-}
-
-func assertEqual(t *testing.T, expected, actual any, message string, args ...any) {
-	if expected != actual {
-		t.Errorf(message, args...)
+	if listenerCount != counter {
+		t.Fail()
 	}
 }
