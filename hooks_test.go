@@ -1,67 +1,64 @@
 package hooks
 
 import (
+	"sync"
 	"testing"
 )
 
-type testUser struct {
-	id   int
-	name string
-}
-
 const (
-	testHookName  = "test.event.type"
+	hookName      = "test.hook"
 	listenerCount = 3
 )
 
-func TestNewEvent(t *testing.T) {
-	counter := 0
-	user := &testUser{
-		name: "Mike",
-		id:   123,
-	}
+type message struct {
+	id int
+}
 
-	testHook := NewHook[testUser](testHookName)
+type listener struct {
+	counter int
+	msg     *message
+	hook    *Hook[message]
+	wg      sync.WaitGroup
+	t       *testing.T
+}
 
-	listener := func(event Event[testUser]) {
-		counter++
-
-		if user != event.Msg {
-			t.Fail()
-		}
-
-		if testHook != event.Hook {
-			t.Fail()
-		}
-
-		if testHookName != event.Hook.GetName() {
-			t.Fail()
-		}
+// newListener creates and initializes a new listener with a hook and message
+func newListener(t *testing.T) (*listener, *Hook[message], *message) {
+	msg := &message{id: 123}
+	h := NewHook[message](hookName)
+	l := &listener{
+		t:    t,
+		msg:  msg,
+		hook: h,
 	}
 
 	for i := 0; i < listenerCount; i++ {
-		testHook.Listen(listener)
+		h.Listen(l.Callback)
 	}
 
-	if listenerCount != testHook.GetListenerCount() {
+	l.wg.Add(listenerCount)
+
+	if listenerCount != h.GetListenerCount() {
 		t.Fail()
 	}
 
-	testHook.Dispatch(user)
-
-	if listenerCount != counter {
-		t.Fail()
-	}
+	return l, h, msg
 }
 
-//func thing() {
-//	userPreUpdate := NewHook[testUser]("user.preupdate")
-//	userUpdate := NewHook[testUser]("user.update")
-//	userUpdate.Listen(func(event Event[testUser]) {
-//
-//	})
-//
-//	userPreUpdate.NewEvent(&testUser{}).Dispatch()
-//	user.Save()
-//	userUpdate.NewEvent(&testUser{}).Dispatch()
-//}
+func (l *listener) Callback(event Event[message]) {
+	l.counter++
+
+	if l.msg != event.Msg {
+		l.t.Fail()
+	}
+
+	if l.hook != event.Hook {
+		l.t.Fail()
+	}
+
+	if hookName != event.Hook.GetName() {
+		l.t.Fail()
+	}
+
+	l.wg.Done()
+}
