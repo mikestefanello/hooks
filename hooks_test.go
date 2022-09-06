@@ -10,10 +10,12 @@ const (
 	listenerCount = 3
 )
 
+// message holds the data being dispatched via the test hooks
 type message struct {
 	id int
 }
 
+// listener facilitate the testing of hook listeners
 type listener struct {
 	counter int
 	msg     *message
@@ -45,6 +47,8 @@ func newListener(t *testing.T) (*listener, *Hook[message], *message) {
 	return l, h, msg
 }
 
+// Callback is the callback method for the test hooks that counts executions, confirms the event data, and
+// handles waitgroups for concurrency
 func (l *listener) Callback(event Event[message]) {
 	l.counter++
 

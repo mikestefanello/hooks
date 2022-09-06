@@ -1,7 +1,11 @@
 package hooks
 
+// Event is a wrapper containing the data being dispatched through a hook
 type Event[T any] struct {
-	Msg  *T
+	// Msg contains the data being dispatched through a hook
+	Msg *T
+
+	// Hook contains the hook that dispatched this event
 	Hook *Hook[T]
 }
 
