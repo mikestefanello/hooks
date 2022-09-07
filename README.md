@@ -73,9 +73,10 @@ HookOne.Listen(listener)
 HookTwo.Listen(listener)
 
 func listener(e hooks.Event[SomeType]) {
-    switch e.Hook:
-        case HookOne:
-        case HookTwo:
+    switch e.Hook {
+    case HookOne:
+    case HookTwo:
+    }
 }
 ```
 
@@ -159,8 +160,6 @@ func BuildRouter(e *echo.Echo) {
 package todo
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 	"github.com/mikestefanello/hooks"
 	"github.com/myapp/router"
