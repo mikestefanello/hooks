@@ -4,13 +4,16 @@ import (
 	"sync"
 )
 
+// Listener is a function that can listen and react to a hook event
+type Listener[T any] func(event Event[T])
+
 // Hook is a mechanism which supports the ability to dispatch data to arbitrary listener callbacks
 type Hook[T any] struct {
 	// name stores the name of the hook
 	name string
 
 	// listeners stores the functions which will be invoked during dispatch
-	listeners []func(event Event[T])
+	listeners []Listener[T]
 
 	// mu stores the mutex to provide concurrency-safe operations
 	mu sync.RWMutex
@@ -22,7 +25,7 @@ func NewHook[T any](name string) *Hook[T] {
 
 	return &Hook[T]{
 		name:      name,
-		listeners: make([]func(event Event[T]), 0),
+		listeners: make([]Listener[T], 0),
 		mu:        sync.RWMutex{},
 	}
 }
@@ -33,7 +36,7 @@ func (h *Hook[T]) GetName() string {
 }
 
 // Listen registers a callback function to be invoked when the hook dispatches data
-func (h *Hook[T]) Listen(callback func(event Event[T])) {
+func (h *Hook[T]) Listen(callback Listener[T]) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 

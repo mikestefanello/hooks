@@ -25,19 +25,7 @@ type User struct {
 var HookUserInsert = hooks.NewHook[User]("user.insert")
 ```
 
-2) Dispatch the data to the hook _listeners_:
-
-```go
-func (u *User) Insert() {
-    db.Insert("INSERT INTO users ...")
-    
-    HookUserInsert.Dispatch(&u)
-}
-```
-
-Or, dispatch all listeners asynchronously with `HookUserInsert.DispatchAsync(u)`.
-
-3) Listen to a hook:
+2Listen to a hook:
 
 ```go
 package greeter
@@ -48,6 +36,18 @@ func init() {
     })
 }
 ```
+
+3) Dispatch the data to the hook _listeners_:
+
+```go
+func (u *User) Insert() {
+    db.Insert("INSERT INTO users ...")
+
+    HookUserInsert.Dispatch(&u)
+}
+```
+
+Or, dispatch all listeners asynchronously with `HookUserInsert.DispatchAsync(u)`.
 
 ### Things to know
 
@@ -206,15 +206,16 @@ Hook listeners can also provide validation or other similar input on data that i
 ```go
 type UserValidation struct {
     User User
-    Errors []error
+    Errors *[]error
 }
 
 var HookUserValidate = hooks.NewHook[UserValidation]("user.validate")
 
 func (u *User) Validate() []error {
-    uv := &UserValidation{
-        User: &u,
-        Errors: make([]error, 0)
+    errs := make([]error, 0)
+    uv := UserValidation{
+        User:   *u,
+        Errors: &errs,
     }
 
     if u.Email == "" {
