@@ -18,6 +18,8 @@ type Hook[T any] struct {
 
 // NewHook creates a new Hook
 func NewHook[T any](name string) *Hook[T] {
+	logf("hook created: %s", name)
+
 	return &Hook[T]{
 		name:      name,
 		listeners: make([]func(event Event[T]), 0),
@@ -36,6 +38,8 @@ func (h *Hook[T]) Listen(callback func(event Event[T])) {
 	defer h.mu.Unlock()
 
 	h.listeners = append(h.listeners, callback)
+
+	logf("registered listener with hook: %s", h.GetName())
 }
 
 // GetListenerCount returns the number of listeners currently registered
@@ -63,6 +67,8 @@ func (h *Hook[T]) dispatch(message T, async bool) {
 
 	e := newEvent[T](h, message)
 
+	logf("dispatching hook %s to %d listeners (async: %v)", h.GetName(), len(h.listeners), async)
+
 	for _, callback := range h.listeners {
 		if async {
 			go callback(e)
@@ -70,4 +76,6 @@ func (h *Hook[T]) dispatch(message T, async bool) {
 			callback(e)
 		}
 	}
+
+	logf("dispatch to hook %s complete", h.GetName())
 }

@@ -235,3 +235,22 @@ HookUserValidate.Listen(func(e hooks.Event[user.UserValidate]) {
     }
 })
 ```
+
+## Logging
+
+By default, nothing will be logged, but you have the option to specify a _logger_ in order to have insight into what is happening within the hooks. Pass a function in to `SetLogger()`, for example:
+
+```go
+hooks.SetLogger(func(format string, args ...any) {
+    log.Printf(format, args...)
+})
+```
+
+```
+2022/09/07 13:42:19 hook created: user.update
+2022/09/07 13:42:19 registered listener with hook: user.update
+2022/09/07 13:42:19 registered listener with hook: user.update
+2022/09/07 13:42:19 registered listener with hook: user.update
+2022/09/07 13:42:19 dispatching hook user.update to 3 listeners (async: false)
+2022/09/07 13:42:19 dispatch to hook user.update complete
+```
