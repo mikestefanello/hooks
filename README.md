@@ -31,7 +31,7 @@ var HookUserInsert = hooks.NewHook[User]("user.insert")
 func (u *User) Insert() {
     db.Insert("INSERT INTO users ...")
     
-    HookUserInsert.Dispatch(u)
+    HookUserInsert.Dispatch(&u)
 }
 ```
 
@@ -80,7 +80,7 @@ func listener(e hooks.Event[SomeType]) {
 }
 ```
 
-- Since the `Msg` is provided as a _pointer_, a hook can modify the the data which can be useful to allow for modifications prior to saving a user, for example.
+- If the `Msg` is provided as a _pointer_, a hook can modify the the data which can be useful to allow for modifications prior to saving a user, for example.
 - You do not have to use `init()` to listen to hooks. For example, another pattern for this example could be:
 
 ```go
@@ -160,9 +160,9 @@ func BuildRouter(e *echo.Echo) {
 package todo
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/mikestefanello/hooks"
-	"github.com/myapp/router"
+    "github.com/labstack/echo/v4"
+    "github.com/mikestefanello/hooks"
+    "github.com/myapp/router"
 )
 
 func init() {
@@ -176,9 +176,11 @@ func init() {
 
 ### Modifications
 
-Hook listeners can be used to make modifications to data prior to some operation being executed. For example, using the `User` from above:
+Hook listeners can be used to make modifications to data prior to some operation being executed if the _message_ is provided as a pointer. For example, using the `User` from above:
 
 ```go
+var HookUserPreInsert = hooks.NewHook[*User]("user.pre_insert")
+
 func (u *User) Insert() {
     // Let other modules make any required changes prior to inserting
     HookUserPreInsert.Dispatch(u)

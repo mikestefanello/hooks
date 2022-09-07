@@ -19,15 +19,15 @@ type message struct {
 type listener struct {
 	counter int
 	msg     *message
-	hook    *Hook[message]
+	hook    *Hook[*message]
 	wg      sync.WaitGroup
 	t       *testing.T
 }
 
 // newListener creates and initializes a new listener with a hook and message
-func newListener(t *testing.T) (*listener, *Hook[message], *message) {
+func newListener(t *testing.T) (*listener, *Hook[*message], *message) {
 	msg := &message{id: 123}
-	h := NewHook[message](hookName)
+	h := NewHook[*message](hookName)
 	l := &listener{
 		t:    t,
 		msg:  msg,
@@ -49,7 +49,7 @@ func newListener(t *testing.T) (*listener, *Hook[message], *message) {
 
 // Callback is the callback method for the test hooks that counts executions, confirms the event data, and
 // handles waitgroups for concurrency
-func (l *listener) Callback(event Event[message]) {
+func (l *listener) Callback(event Event[*message]) {
 	l.counter++
 
 	if l.msg != event.Msg {

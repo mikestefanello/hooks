@@ -47,17 +47,17 @@ func (h *Hook[T]) GetListenerCount() int {
 }
 
 // Dispatch invokes all listeners synchronously with the provided message
-func (h *Hook[T]) Dispatch(message *T) {
+func (h *Hook[T]) Dispatch(message T) {
 	h.dispatch(message, false)
 }
 
 // DispatchAsync invokes all listeners asynchronously with the provided message
-func (h *Hook[T]) DispatchAsync(message *T) {
+func (h *Hook[T]) DispatchAsync(message T) {
 	h.dispatch(message, true)
 }
 
 // dispatch invokes all listeners either synchronously or asynchronously with the provided message
-func (h *Hook[T]) dispatch(message *T, async bool) {
+func (h *Hook[T]) dispatch(message T, async bool) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
