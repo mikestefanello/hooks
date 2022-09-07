@@ -25,7 +25,7 @@ type User struct {
 var HookUserInsert = hooks.NewHook[User]("user.insert")
 ```
 
-2Listen to a hook:
+2) Listen to a hook:
 
 ```go
 package greeter
@@ -223,7 +223,7 @@ func (u *User) Validate() []error {
     }
     
     // Let other modules validate
-    HookUserValidate.Dispatch(u)
+    HookUserValidate.Dispatch(uv)
 	
     return uv.Errors
 }
