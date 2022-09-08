@@ -190,12 +190,12 @@ func (u *User) Insert() {
     db.Insert("INSERT INTO users ...")
     
     // Notify other modules of the inserted user
-    HookUserInsert.Dispatch(u)
+    HookUserInsert.Dispatch(*u)
 }
 ```
 
 ```go
-HookUserPreInsert.Listen(func(e hooks.Event[user.User]) {
+HookUserPreInsert.Listen(func(e hooks.Event[*user.User]) {
     // Change the user's name
     e.Msg.Name = fmt.Sprintf("%s-changed", e.Msg.Name)
 })
