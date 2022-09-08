@@ -12,7 +12,7 @@ Hooks can be very beneficial especially in a monolithic application both for ove
 
 ## Usage
 
-1) Start by declaring a new hook which requires specifying the _type_ of data that it will dispatch as well as a name. This is often done as a global variable:
+1) Start by declaring a new hook which requires specifying the _type_ of data that it will dispatch as well as a name. This can be done in a number of different way such as a global variable or exported field on a _struct_:
 
 ```go
 package user
@@ -103,6 +103,36 @@ func NewGreeter(client email.Client) *Greeter {
 }
 ```
 
+- Following the previous example, hooks can be provided as part of exported _structs_ rather than just global variables, for example:
+
+```go
+package greeter
+
+type Greeter struct {
+    HookSendEmail *hooks.Hook[Email]
+    emailClient email.Client
+}
+
+func NewGreeter(client email.Client) *Greeter {
+    g := &Greeter{emailClient: client}
+
+    user.HookUserInsert.Listen(func (e hooks.Event[user.User]) {
+        g.sendEmail(e.Msg.Email)
+    })
+
+    return g
+}
+
+func (g *Greeter) sendEmail(email string) error {
+    e := Email{To: email}
+    if err := g.emailClient.Send(e); err != nil {
+        return err
+    }
+
+    g.HookSendEmail.Dispatch(e)
+}
+```
+
 ## More examples
 
 While event-driven usage as shown above is the most common use-case of hooks, they can also be used to extend functionality and logic or the process in which components are built. Here are some more examples.
@@ -175,6 +205,75 @@ func init() {
     })
 }
 ```
+
+### Dependency creation (and injection)
+
+Rather than inititalize all of your dependencies in a single place, hooks can be used to distribute these tasks to the providing packages and great dependency injection libraries like _[do](https://github.com/samber/do)_ can be used to manage them.
+
+```go
+package main
+
+import (
+    "github.com/mikestefanello/hooks"
+    "github.com/samber/do"
+
+    "example/services/app"
+    "example/services/web"
+)
+
+func main() {
+    i := app.Boot()
+
+    server := do.MustInvoke[*web.Web](i)
+    server.Start()
+}
+```
+```go
+package app
+
+import (
+    "github.com/mikestefanello/hooks"
+    "github.com/samber/do"
+)
+
+var HookBoot = hooks.NewHook[*do.Injector]("boot")
+
+func Boot() *do.Injector {
+    injector := do.New()
+    HookBoot.Dispatch(injector)
+    return injector
+}
+```
+
+```go
+package web
+
+import (
+    "net/http"
+
+    "github.com/mikestefanello/hooks"
+    "github.com/samber/do"
+
+    "example/services/app"
+)
+
+type Web struct {}
+
+func init() {
+    app.HookBoot.Listen(func(e hooks.Event[*do.Injector]) {
+        do.Provide(e.Msg, NewWeb)
+    })
+}
+
+func NewWeb(i *do.Injector) (*Web, error) {
+    return &Web{}, nil
+}
+
+func (w *Web) Start() error {
+    return http.ListenAndServe(":8080", nil)
+}
+```
+
 
 ### Modifications
 
