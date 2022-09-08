@@ -2,7 +2,9 @@
 
 ## Overview
 
-_Hooks_ provides a simple, **type-safe** hook system to enable easier modularization of your Go code. A _hook_ allows various parts of your codebase to tap in to events and operations happening elsewhere which prevents direct coupling between the producer and the consumers/listeners. For example, a _user_ package/module in your code may dispatch a _hook_ when a user is created, allowing your _notification_ package to send the user an email, and a _history_ package to record the activity without the _user_ module having to call these components directly. A hook can also be used to allow other modules to alter and extend data before it is processed.
+_Hooks_ provides a simple, **type-safe** hook system to enable easier modularization of your Go code. A _hook_ allows various parts of your codebase to tap into events and operations happening elsewhere which prevents direct coupling between the producer and the consumers/listeners. For example, a _user_ package/module in your code may dispatch a _hook_ when a user is created, allowing your _notification_ package to send the user an email, and a _history_ package to record the activity without the _user_ module having to call these components directly. A hook can also be used to allow other modules to alter and extend data before it is processed.
+
+Hooks can be very beneficial especially in a monolithic application both for overall organization as well as in preparation for the splitting of modules into separate synchronous or asynchronous services.
 
 ## Installation
 
