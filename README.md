@@ -1,5 +1,11 @@
 # Hooks
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/mikestefanello/hooks)](https://goreportcard.com/report/github.com/mikestefanello/hooks)
+[![Test](https://github.com/mikestefanello/hooks/actions/workflows/test.yml/badge.svg)](https://github.com/mikestefanello/hooks/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Go Reference](https://pkg.go.dev/badge/github.com/mikestefanello/hooks.svg)](https://pkg.go.dev/github.com/mikestefanello/hooks)
+[![GoT](https://img.shields.io/badge/Made%20with-Go-1f425f.svg)](https://go.dev)
+
 ## Overview
 
 _Hooks_ provides a simple, **type-safe** hook system to enable easier modularization of your Go code. A _hook_ allows various parts of your codebase to tap into events and operations happening elsewhere which prevents direct coupling between the producer and the consumers/listeners. For example, a _user_ package/module in your code may dispatch a _hook_ when a user is created, allowing your _notification_ package to send the user an email, and a _history_ package to record the activity without the _user_ module having to call these components directly. A hook can also be used to allow other modules to alter and extend data before it is processed.
@@ -257,7 +263,13 @@ import (
     "example/services/app"
 )
 
-type Web struct {}
+type (
+    Web interface {
+        Start() error
+    }
+
+    web struct {}
+)
 
 func init() {
     app.HookBoot.Listen(func(e hooks.Event[*do.Injector]) {
@@ -265,11 +277,11 @@ func init() {
     })
 }
 
-func NewWeb(i *do.Injector) (*Web, error) {
-    return &Web{}, nil
+func NewWeb(i *do.Injector) (Web, error) {
+    return &web{}, nil
 }
 
-func (w *Web) Start() error {
+func (w *web) Start() error {
     return http.ListenAndServe(":8080", nil)
 }
 ```
