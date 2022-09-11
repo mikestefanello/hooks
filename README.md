@@ -350,6 +350,10 @@ HookUserValidate.Listen(func(e hooks.Event[user.UserValidate]) {
 })
 ```
 
+### Full application example
+
+For a full application example see [hooks-example](https://github.com/mikestefanello/hooks-example). This aims to provide a modular monolithic architectural approach to a Go application using _hooks_ and [do](https://github.com/samber/do) _(dependency injection)_.
+
 ## Logging
 
 By default, nothing will be logged, but you have the option to specify a _logger_ in order to have insight into what is happening within the hooks. Pass a function in to `SetLogger()`, for example:
