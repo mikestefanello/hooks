@@ -70,7 +70,12 @@ func (h *Hook[T]) dispatch(message T, async bool) {
 
 	e := newEvent[T](h, message)
 
-	logf("dispatching hook %s to %d listeners (async: %v)", h.GetName(), len(h.listeners), async)
+	// Check if the logger is available here to avoid the call since dispatching can happen very often and
+	// this can help with performance
+	if logger != nil {
+		logf("dispatching hook %s to %d listeners (async: %v)", h.GetName(), len(h.listeners), async)
+		defer logf("dispatch to hook %s complete", h.GetName())
+	}
 
 	for _, callback := range h.listeners {
 		if async {
@@ -79,6 +84,4 @@ func (h *Hook[T]) dispatch(message T, async bool) {
 			callback(e)
 		}
 	}
-
-	logf("dispatch to hook %s complete", h.GetName())
 }
